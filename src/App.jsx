@@ -206,93 +206,57 @@ const BigButton = ({ icon: Icon, label, onClick, borderColor }) => (
   </button>
 );
 
-// TICKET DE IMPRESIÓN REDISEÑADO 100% PARA 58mm TÉRMICA
+// --- TICKET CLÁSICO RESTAURADO (80MM - STANDARD - SIN LOGO) ---
 const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
   const formatPriceTicket = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
-  const dateStr = date ? date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit', year: '2-digit'}) : '';
-  const timeStr = date ? date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false}) : '';
+  
+  // Formato fecha: 28/05 20:30 (Sin AM/PM para ahorrar espacio)
+  const dateStr = date ? `${date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'})} ${date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false})}` : '';
 
   return (
-    // Style en linea clave: WebkitPrintColorAdjust fuerza a las térmicas a imprimir los fondos negros.
-    <div id="printable-area" className="hidden print:block bg-white text-black p-0 m-0 w-full max-w-[58mm] mx-auto font-sans print:color-adjust-exact print:print-color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+    <div id="printable-area" className="hidden print:block bg-white text-black p-4 w-full max-w-[80mm] mx-auto font-mono text-sm leading-tight">
+      <div className="text-center mb-4 border-b border-black pb-2 border-dashed">
+        <h1 className="text-xl font-black uppercase">GEQC</h1>
+        <p className="text-xs">Comprobante de Pedido</p>
+        <p className="text-xs mt-1">{dateStr}</p>
+      </div>
+
+      <div className="mb-4 text-xs">
+        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
+        {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
+      </div>
+
+      <div className="border-b border-black border-dashed mb-2"></div>
       
-      {/* Contenedor principal con borde grueso y esquinas redondeadas */}
-      <div className="border-[3px] border-black rounded-2xl p-1.5 pb-2 flex flex-col gap-2 mt-2">
-        
-        {/* Logo / Título */}
-        <div className="text-center flex flex-col items-center justify-center pt-1">
-          {/* Logo fallback: soporta la imagen si existe, sino muestra el ícono automáticamente */}
-          <div className="relative flex justify-center items-center h-12 w-full mb-1">
-             <Utensils size={32} className="text-black z-0 absolute" strokeWidth={2.5} />
-             <img src="/public/logo.jpg" alt="" className="h-full object-contain grayscale absolute inset-0 mx-auto z-10 bg-white" onError={(e) => e.target.style.display='none'} />
-          </div>
-          <h1 className="text-[16px] font-black uppercase tracking-tighter leading-none m-0">EL QUINCHO</h1>
-          <p className="text-[10px] font-black tracking-[0.2em] uppercase mt-1 leading-none">COCINA</p>
-        </div>
-
-        {/* Cajas de Fecha y Cliente */}
-        <div className="flex gap-1.5 mt-2">
-          {/* FECHA */}
-          <div className="border-[2px] border-black rounded-[8px] relative pt-2.5 pb-1.5 px-1 w-[40%] flex items-center justify-center">
-            <span className="absolute -top-[7px] left-1.5 bg-white px-1 text-[8px] font-black tracking-widest">FECHA</span>
-            <p className="text-[10px] font-bold text-center leading-none">{dateStr} {timeStr}</p>
-          </div>
-          {/* CLIENTE */}
-          <div className="border-[2px] border-black rounded-[8px] relative pt-2.5 pb-1.5 px-1.5 w-[60%] flex flex-col justify-center">
-            <span className="absolute -top-[7px] left-1.5 bg-white px-1 text-[8px] font-black tracking-widest">CLIENTE</span>
-            <p className="text-[11px] font-bold text-left leading-none truncate">{customerName || 'Mostrador'}</p>
-          </div>
-        </div>
-
-        {/* CAJA DIRECCIÓN (Opcional, sólo se imprime si hay) */}
-        {customerAddress && (
-          <div className="border-[2px] border-black rounded-[8px] relative pt-2.5 pb-1.5 px-1.5 w-full flex flex-col justify-center mt-1">
-            <span className="absolute -top-[7px] left-1.5 bg-white px-1 text-[8px] font-black tracking-widest">DIRECCIÓN</span>
-            <p className="text-[11px] font-bold text-left leading-tight line-clamp-2">{customerAddress}</p>
-          </div>
-        )}
-
-        {/* TABLA PRINCIPAL DE PRODUCTOS */}
-        <div className="border-[2px] border-black rounded-[8px] flex flex-col overflow-hidden mt-1.5">
-          {/* Encabezado Negro */}
-          <div className="bg-black text-white flex text-[9px] font-black uppercase border-b-[2px] border-black">
-            <div className="w-[18%] text-center py-1 border-r-[2px] border-white">CANT</div>
-            <div className="w-[52%] text-center py-1 border-r-[2px] border-white">DESCRIPCIÓN</div>
-            <div className="w-[30%] text-center py-1">VALOR</div>
-          </div>
-          
-          {/* Filas de Productos */}
-          <div className="flex flex-col bg-white">
-            {cart.map((item, index) => (
-              <div key={`${item.id}-${index}`} className="flex border-b-[2px] border-black last:border-b-0 items-stretch">
-                <div className="w-[18%] text-center border-r-[2px] border-black py-1 text-[12px] font-black flex items-center justify-center">
-                  {item.qty}
-                </div>
-                <div className="w-[52%] px-1 border-r-[2px] border-black py-1 break-words flex flex-col justify-center">
-                  <span className="text-[11px] font-bold leading-tight">{item.name} {item.isManual ? '(M)' : ''}</span>
-                  {item.note && <span className="text-[8px] font-black uppercase mt-0.5 leading-none text-slate-800">* {item.note}</span>}
-                </div>
-                <div className="w-[30%] text-center px-0.5 py-1 text-[11px] font-black flex items-center justify-center">
-                  {formatPriceTicket(item.price * item.qty)}
-                </div>
+      <div className="flex flex-col gap-2 mb-4">
+        {cart.map((item, index) => (
+          <div key={`${item.id}-${index}`} className="flex justify-between items-start">
+            <div className="flex flex-col gap-1 w-[70%]">
+              <div className="flex gap-2">
+                 <span className="font-bold">{item.qty}x</span>
+                 <span>{item.name} {item.isManual ? '(M)' : ''}</span>
               </div>
-            ))}
+              {item.note && (
+                 <span className="text-[10px] italic ml-6 uppercase">** {item.note} **</span>
+              )}
+            </div>
+            <span className="font-bold whitespace-nowrap">
+              {formatPriceTicket(item.price * item.qty)}
+            </span>
           </div>
-        </div>
+        ))}
+      </div>
 
-        {/* TOTAL */}
-        <div className="flex justify-end mt-1.5">
-          <div className="border-[2px] border-black rounded-[8px] relative pt-2 pb-1.5 px-2 w-[70%] flex justify-between items-center bg-white">
-            <span className="absolute -top-[7px] left-1.5 bg-white px-1 text-[8px] font-black tracking-widest">TOTAL</span>
-            <span className="font-black text-[16px] w-full text-right leading-none">{formatPriceTicket(total)}</span>
-          </div>
+      <div className="border-t border-black border-dashed pt-2 mb-4">
+        <div className="flex justify-between items-center text-lg font-black">
+          <span>TOTAL</span>
+          <span>{formatPriceTicket(total)}</span>
         </div>
+      </div>
 
-        {/* MENSAJE FINAL */}
-        <div className="text-center mt-2 mb-1">
-          <p className="text-[9px] font-black uppercase tracking-widest">¡Gracias por elegirnos!</p>
-        </div>
-
+      <div className="text-center text-xs mt-6">
+        <p>¡Gracias por su compra!</p>
+        <p className="mt-1">@el_quincho.cocina</p>
       </div>
     </div>
   );
