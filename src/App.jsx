@@ -219,12 +219,7 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
       {/* --- INICIO ZONA DE LOGO --- */}
       <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
         {/* Reemplaza "/logo.png" por la ruta real de tu logo. w-16 h-16 controla el tamaño (64px) */}
-        <img 
-           src="/logo.jpg" 
-           alt="Logo" 
-           className="w-16 h-16 object-contain grayscale mb-1" 
-           onError={(e) => e.target.style.display='none'} 
-        />
+
         <h1 className="text-xl font-black uppercase leading-none">GEQC</h1>
         <p className="text-[11px] mt-1">Comprobante de Pedido</p>
         <p className="text-[11px] mt-0.5">{dateStr}</p>
@@ -234,7 +229,7 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
       <div className="mb-3 text-[11px]">
         <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
         {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
-      </div>
+      </div><br />
 
       <div className="border-b border-black border-dashed mb-2"></div>
       
@@ -258,14 +253,14 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
             
           </div>
         ))}
-      </div>
+      </div><br />
 
       <div className="border-t border-black border-dashed pt-2 mb-4">
         <div className="flex justify-between items-center text-sm font-black">
           <span>TOTAL</span>
           <span>{formatPriceTicket(total)}</span>
         </div>
-      </div>
+      </div><br />
 
       <div className="text-center text-[10px] mt-4 mb-2">
         <p>¡Gracias por su compra!</p>
