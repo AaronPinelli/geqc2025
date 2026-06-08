@@ -924,7 +924,7 @@ export default function App() {
                     const isSelected = selectedPosCategory === cat && !searchQuery;
                     return (
                       <button key={cat} onClick={() => { setSelectedPosCategory(cat); setSearchQuery(''); }} className={`px-4 py-3 shrink-0 flex items-center gap-2 rounded-2xl transition-all border-2 ${isSelected ? 'bg-[#034aaa] text-white border-[#034aaa] shadow-md' : 'bg-white text-black border-slate-200 hover:bg-slate-50'}`}>
-                        <IconComp size={18} className={`${isSelected ? 'text-white' : 'text-red-600'}`} />
+                        <IconComp size={18} className={`${isSelected ? 'text-white' : 'text-green-600'}`} />
                         <span className="text-xs sm:text-sm font-black uppercase tracking-widest">{cat}</span>
                       </button>
                     )
