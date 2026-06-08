@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Utensils, 
   Plus, 
@@ -208,47 +208,72 @@ const BigButton = ({ icon: Icon, label, onClick, borderColor }) => (
 
 const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
   const formatPriceTicket = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
-  const dateStr = date ? `${date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'})} ${date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false})}` : '';
+  const dateStr = date ? date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit', year: '2-digit'}) : '';
+  const timeStr = date ? date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false}) : '';
 
   return (
-    <div id="printable-area" className="hidden print:block bg-white text-black p-4 w-full max-w-[80mm] mx-auto font-mono text-sm leading-tight">
-      <div className="text-center mb-4 border-b border-black pb-2 border-dashed">
-        <h1 className="text-xl font-black uppercase">EL QUINCHO</h1>
-        <p className="text-xs">Comprobante de Pedido</p>
-        <p className="text-xs mt-1">{dateStr}</p>
-      </div>
-      <div className="mb-4 text-xs">
-        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
-        {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
-      </div>
-      <div className="border-b border-black border-dashed mb-2"></div>
-      <div className="flex flex-col gap-2 mb-4">
-        {cart.map((item, index) => (
-          <div key={`${item.id}-${index}`} className="flex justify-between items-start">
-            <div className="flex flex-col gap-1 w-[70%]">
-              <div className="flex gap-2">
-                 <span className="font-bold">{item.qty}x</span>
-                 <span>{item.name} {item.isManual ? '(M)' : ''}</span>
-              </div>
-              {item.note && (
-                 <span className="text-[10px] italic ml-6 uppercase">** {item.note} **</span>
-              )}
-            </div>
-            <span className="font-bold whitespace-nowrap">
-              {formatPriceTicket(item.price * item.qty)}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="border-t border-black border-dashed pt-2 mb-4">
-        <div className="flex justify-between items-center text-lg font-black">
-          <span>TOTAL</span>
-          <span>{formatPriceTicket(total)}</span>
+    <div id="printable-area" className="hidden print:block bg-white text-black p-0 w-full max-w-[58mm] mx-auto font-sans leading-tight">
+      {/* Contenedor principal con borde redondeado estilo ticket de la imagen */}
+      <div className="border-2 border-black rounded-xl p-1.5 pb-2">
+        
+        {/* Cabecera / Logo */}
+        <div className="text-center flex flex-col items-center justify-center mb-3 mt-1">
+          <Utensils size={18} className="text-black mb-1" strokeWidth={2.5} />
+          <h1 className="text-[14px] font-black uppercase tracking-tighter leading-none">EL QUINCHO COCINA</h1>
+          <p className="text-[7px] font-black tracking-widest uppercase mt-0.5">QUALITY FOOD</p>
         </div>
-      </div>
-      <div className="text-center text-xs mt-6">
-        <p>¡Gracias por su compra!</p>
-        <p className="mt-1">@el_quincho.cocina</p>
+
+        {/* Inputs de arriba (FECHA y CLIENTE) */}
+        <div className="flex gap-1.5 mb-2">
+          <div className="border-2 border-black rounded-lg relative pt-2 pb-1 px-1 w-[40%] flex items-center justify-center min-h-[24px]">
+            <span className="absolute -top-[7px] left-1.5 bg-white px-0.5 text-[7px] font-black tracking-wider">FECHA</span>
+            <p className="text-[7px] font-bold text-center leading-tight">{dateStr} {timeStr}</p>
+          </div>
+          <div className="border-2 border-black rounded-lg relative pt-2 pb-1 px-1.5 w-[60%] flex flex-col justify-center min-h-[24px]">
+            <span className="absolute -top-[7px] left-1.5 bg-white px-0.5 text-[7px] font-black tracking-wider">CLIENTE</span>
+            <p className="text-[9px] font-bold text-left leading-tight truncate">{customerName || 'Mostrador'}</p>
+          </div>
+        </div>
+
+        {/* CAJA DE DIRECCIÓN SEPARADA (Reemplazo visual de la Mesa) */}
+        {customerAddress && (
+          <div className="border-2 border-black rounded-lg relative pt-2 pb-1.5 px-1.5 w-full flex flex-col justify-center mb-2 min-h-[24px]">
+            <span className="absolute -top-[7px] left-1.5 bg-white px-0.5 text-[7px] font-black tracking-wider">DIRECCIÓN</span>
+            <p className="text-[8px] font-bold text-left leading-tight truncate">{customerAddress}</p>
+          </div>
+        )}
+
+        {/* Tabla de Pedido */}
+        <div className="border-2 border-black rounded-lg flex flex-col overflow-hidden mb-2.5 mt-1">
+          {/* Header negro */}
+          <div className="bg-black text-white flex text-[8px] font-black uppercase">
+            <div className="w-[18%] text-center py-1 border-r border-white">CANT</div>
+            <div className="w-[52%] text-center py-1 border-r border-white">DESCRIPCIÓN</div>
+            <div className="w-[30%] text-center py-1">VALOR</div>
+          </div>
+          {/* Filas */}
+          {cart.map((item, index) => (
+            <div key={`${item.id}-${index}`} className="flex text-[9px] border-t-2 border-black items-stretch min-h-[18px]">
+              <div className="w-[18%] text-center border-r-2 border-black py-0.5 font-black flex items-center justify-center">{item.qty}</div>
+              <div className="w-[52%] px-1 border-r-2 border-black py-0.5 break-words flex flex-col justify-center">
+                <span className="font-bold leading-tight">{item.name} {item.isManual ? '(M)' : ''}</span>
+                {item.note && <span className="text-[7px] font-bold uppercase mt-0.5 leading-none text-gray-800">* {item.note}</span>}
+              </div>
+              <div className="w-[30%] text-center px-0.5 py-0.5 font-black flex items-center justify-center">
+                {formatPriceTicket(item.price * item.qty)}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer / Total */}
+        <div className="flex justify-end mt-1">
+          <div className="border-2 border-black rounded-lg relative pt-1 pb-1 px-2 w-[70%] flex justify-between items-center bg-white min-h-[24px]">
+            <span className="absolute -top-[7px] left-1.5 bg-white px-0.5 text-[7px] font-black tracking-wider">TOTAL</span>
+            <span className="font-black text-[14px] w-full text-right">{formatPriceTicket(total)}</span>
+          </div>
+        </div>
+        
       </div>
     </div>
   );
@@ -265,7 +290,7 @@ export default function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
   const [cart, setCart] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false); // Para el modal del carrito en celular
+  const [isCartOpen, setIsCartOpen] = useState(false);
   
   // ESTADOS PRESUPUESTO
   const [wallet, setWallet] = useState({ cash: 0, transfer: 0 });
@@ -696,10 +721,11 @@ export default function App() {
 
   const handleDeleteItem = async (id) => { if (window.confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'menu', id)); };
   
-  const addToCart = (item) => setCart(p => {
+  // FUNCIONES DEL CARRITO OPTIMIZADAS CON useCallback (para evitar renders infinitos)
+  const addToCart = useCallback((item) => setCart(p => {
     const ex = p.find(i => i.id === item.id);
     return ex ? p.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i) : [...p, { ...item, qty: 1 }];
-  });
+  }), []);
   
   const addManualItemToCart = () => {
     const p = parseFloat(manualItemPrice);
@@ -708,8 +734,8 @@ export default function App() {
     setManualItemName(''); setManualItemPrice(''); setIsManualItemModalOpen(false);
   };
 
-  const removeFromCart = (id) => setCart(p => p.filter(i => i.id !== id));
-  const updateCartQty = (id, d) => setCart(p => p.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + d) } : i));
+  const removeFromCart = useCallback((id) => setCart(p => p.filter(i => i.id !== id)), []);
+  const updateCartQty = useCallback((id, d) => setCart(p => p.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + d) } : i)), []);
   const cartTotal = useMemo(() => cart.reduce((acc, i) => acc + (i.price * i.qty), 0), [cart]);
 
   const handleCheckout = async () => {
@@ -760,6 +786,28 @@ export default function App() {
     if (searchQuery.trim()) return menuItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
     return menuItems.filter(i => (i.category || 'Otros') === selectedPosCategory);
   }, [menuItems, selectedPosCategory, searchQuery]);
+
+  // RENDERIZADO OPTIMIZADO DE LA GRILLA (Para evitar lag al escribir el nombre del cliente)
+  const memoizedProductGrid = useMemo(() => (
+    <div className="px-3 pb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      {displayedItems.map(item => (
+        <button key={item.id} onClick={() => addToCart(item)} className="bg-white p-4 sm:p-5 rounded-3xl shadow-sm hover:shadow-md border border-slate-200 text-left flex flex-col justify-between group active:scale-95 transition-transform">
+          <div>
+            <span className="font-black text-[#034aaa] text-base sm:text-lg line-clamp-2 leading-tight uppercase tracking-wide mb-1">{item.name}</span>
+            {item.description && <span className="text-xs font-bold text-slate-400 line-clamp-1">{item.description}</span>}
+          </div>
+          <div className="flex justify-between items-end w-full mt-4">
+              <span className="text-lg sm:text-xl font-black text-black">{formatCurrency(item.price)}</span>
+              <div className="bg-[#034aaa] text-white rounded-xl p-2.5 shadow-sm group-active:bg-[#022c66] transition-colors"><Plus size={20} strokeWidth={3}/></div>
+          </div>
+        </button>
+      ))}
+      <button onClick={() => setIsManualItemModalOpen(true)} className="bg-slate-100 p-4 sm:p-5 rounded-3xl shadow-sm border-2 border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform min-h-[120px]">
+          <div className="bg-white p-3 rounded-full text-slate-500 shadow-sm"><Keyboard size={24}/></div>
+          <span className="font-black text-slate-600 text-sm uppercase tracking-widest">Añadir Extra (Manual)</span>
+      </button>
+    </div>
+  ), [displayedItems, addToCart]);
 
   if (loading) return <div className="min-h-[100dvh] flex items-center justify-center font-black text-2xl tracking-widest text-white bg-[#034aaa]">CARGANDO...</div>;
 
@@ -819,7 +867,7 @@ export default function App() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                 <button onClick={() => { setArqueoResult(null); setArqueoValues({cash: '', transfer: ''}); setIsArqueoModalOpen(true); }} className="w-full bg-[#034aaa] hover:bg-[#022c66] text-white font-black tracking-widest uppercase py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all text-sm sm:text-base"><ClipboardCheck size={24} /> Verificar Arqueo</button>
+                 <button onClick={() => { setArqueoResult(null); setArqueoValues({cash: '', transfer: ''}); setIsArqueoModalOpen(true); }} className="w-full bg-[#034aaa] hover:bg-[#022c66] text-white font-black tracking-widest uppercase py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all text-sm sm:text-base"><ClipboardCheck size={24} /> Verificar </button>
                  <button onClick={() => setIsExpenseModalOpen(true)} className="w-full bg-red-600 hover:bg-red-700 text-white font-black tracking-widest uppercase py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all text-sm sm:text-base"><ArrowDownCircle size={24} /> Registrar Gasto</button>
               </div>
 
@@ -896,27 +944,8 @@ export default function App() {
                  </div>
               </div>
 
-              {/* 3. PRODUCTOS */}
-              <div className="px-3 pb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {displayedItems.map(item => (
-                  <button key={item.id} onClick={() => addToCart(item)} className="bg-white p-4 sm:p-5 rounded-3xl shadow-sm hover:shadow-md border border-slate-200 text-left flex flex-col justify-between group active:scale-95 transition-transform">
-                    <div>
-                      <span className="font-black text-[#034aaa] text-base sm:text-lg line-clamp-2 leading-tight uppercase tracking-wide mb-1">{item.name}</span>
-                      {item.description && <span className="text-xs font-bold text-slate-400 line-clamp-1">{item.description}</span>}
-                    </div>
-                    <div className="flex justify-between items-end w-full mt-4">
-                       <span className="text-lg sm:text-xl font-black text-black">{formatCurrency(item.price)}</span>
-                       <div className="bg-[#034aaa] text-white rounded-xl p-2.5 shadow-sm group-active:bg-[#022c66] transition-colors"><Plus size={20} strokeWidth={3}/></div>
-                    </div>
-                  </button>
-                ))}
-                
-                {/* BOTÓN ITEM MANUAL AL FINAL DE LA LISTA */}
-                <button onClick={() => setIsManualItemModalOpen(true)} className="bg-slate-100 p-4 sm:p-5 rounded-3xl shadow-sm border-2 border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform min-h-[120px]">
-                   <div className="bg-white p-3 rounded-full text-slate-500 shadow-sm"><Keyboard size={24}/></div>
-                   <span className="font-black text-slate-600 text-sm uppercase tracking-widest">Añadir Extra (Manual)</span>
-                </button>
-              </div>
+              {/* 3. PRODUCTOS MEMOIZADOS */}
+              {memoizedProductGrid}
             </div>
 
             {/* BOTÓN CARRITO FLOTANTE (ESTILO APP) */}
@@ -1289,6 +1318,70 @@ export default function App() {
                 </div>
                 <button onClick={saveEditedOrder} className="w-full bg-[#034aaa] text-white font-black uppercase tracking-widest py-3.5 rounded-xl active:scale-95 text-xs"><Save size={18} className="inline mr-2"/> Guardar</button>
               </>
+            )}
+          </div>
+        </Modal>
+
+        {/* --- NUEVOS MODALES FALTANTES AGREGADOS --- */}
+        
+        {/* MODAL REGISTRAR GASTO */}
+        <Modal isOpen={isExpenseModalOpen} onClose={() => setIsExpenseModalOpen(false)} title="REGISTRAR GASTO">
+          <div className="space-y-4">
+            <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Descripción</label><input type="text" className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-red-500 font-black text-base uppercase" placeholder="Ej. Verdulería" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} /></div>
+            <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Monto</label><div className="relative"><span className="absolute left-3 top-3.5 font-black text-slate-400 text-lg">$</span><input type="number" className="w-full pl-8 p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-red-500 font-black text-2xl text-red-600" placeholder="0" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} /></div></div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Medio de Pago</label>
+              <div className="flex gap-2">
+                <button onClick={() => setExpenseSource('cash')} className={`flex-1 p-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${expenseSource === 'cash' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-slate-200 text-slate-400'}`}>Efectivo</button>
+                <button onClick={() => setExpenseSource('transfer')} className={`flex-1 p-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${expenseSource === 'transfer' ? 'bg-purple-50 border-purple-500 text-purple-700' : 'bg-white border-slate-200 text-slate-400'}`}>Transf.</button>
+              </div>
+            </div>
+            <button onClick={handleAddExpense} className="w-full bg-red-600 text-white font-black uppercase tracking-widest py-4 rounded-xl mt-2 active:scale-95 text-sm">GUARDAR GASTO</button>
+          </div>
+        </Modal>
+
+        {/* MODAL EDITAR CAJA MANUAL */}
+        <Modal isOpen={isWalletEditModalOpen} onClose={() => setIsWalletEditModalOpen(false)} title="AJUSTAR CAJA MANUAL">
+          <div className="space-y-4">
+            <div className="bg-amber-50 text-amber-800 p-3 rounded-xl text-[10px] font-bold border border-amber-200 flex items-start gap-2"><AlertCircle size={16} className="shrink-0 mt-0.5"/> Ajusta el saldo base si hay un descuadre. Esto recalculará el total.</div>
+            <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Efectivo Real</label><div className="relative"><span className="absolute left-3 top-3 font-black text-slate-400 text-lg">$</span><input type="number" className="w-full pl-8 p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-[#034aaa] font-black text-xl text-green-600" value={walletEditValues.cash} onChange={e => setWalletEditValues({...walletEditValues, cash: e.target.value})} /></div></div>
+            <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Mercado Pago / Transf. Real</label><div className="relative"><span className="absolute left-3 top-3 font-black text-slate-400 text-lg">$</span><input type="number" className="w-full pl-8 p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-[#034aaa] font-black text-xl text-purple-600" value={walletEditValues.transfer} onChange={e => setWalletEditValues({...walletEditValues, transfer: e.target.value})} /></div></div>
+            <button onClick={handleUpdateWalletManually} className="w-full bg-[#034aaa] text-white font-black uppercase tracking-widest py-4 rounded-xl mt-2 active:scale-95 text-sm">GUARDAR AJUSTE</button>
+          </div>
+        </Modal>
+
+        {/* MODAL ARQUEO DE CAJA */}
+        <Modal isOpen={isArqueoModalOpen} onClose={() => setIsArqueoModalOpen(false)} title="ARQUEO DE CAJA">
+          <div className="space-y-4">
+            {!arqueoResult ? (
+              <>
+                <div className="bg-sky-50 text-sky-800 p-3 rounded-xl text-[10px] font-bold border border-sky-200">Ingresa cuánto dinero tienes FÍSICAMENTE y en tu cuenta de MERCADO PAGO para verificar.</div>
+                <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Efectivo en billetes</label><div className="relative"><span className="absolute left-3 top-3 font-black text-slate-400 text-lg">$</span><input type="number" className="w-full pl-8 p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-[#034aaa] font-black text-xl text-green-600" placeholder="0" value={arqueoValues.cash} onChange={e => setArqueoValues({...arqueoValues, cash: e.target.value})} /></div></div>
+                <div><label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Saldo en Mercado Pago</label><div className="relative"><span className="absolute left-3 top-3 font-black text-slate-400 text-lg">$</span><input type="number" className="w-full pl-8 p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-[#034aaa] font-black text-xl text-purple-600" placeholder="0" value={arqueoValues.transfer} onChange={e => setArqueoValues({...arqueoValues, transfer: e.target.value})} /></div></div>
+                <button onClick={calculateArqueo} className="w-full bg-[#034aaa] text-white font-black uppercase tracking-widest py-4 rounded-xl mt-2 active:scale-95 text-sm">CALCULAR DIFERENCIA</button>
+              </>
+            ) : (
+              <div className="space-y-4 text-center">
+                <h4 className="font-black text-slate-500 uppercase tracking-widest text-xs">Resultado del Arqueo</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className={`p-4 rounded-xl border ${arqueoResult.diffCash === 0 ? 'bg-green-50 border-green-200' : arqueoResult.diffCash > 0 ? 'bg-sky-50 border-sky-200' : 'bg-red-50 border-red-200'}`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Efectivo</p>
+                    <p className={`text-xl font-black ${arqueoResult.diffCash === 0 ? 'text-green-600' : arqueoResult.diffCash > 0 ? 'text-sky-600' : 'text-red-600'}`}>
+                      {arqueoResult.diffCash > 0 ? '+' : ''}{formatCurrency(arqueoResult.diffCash)}
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${arqueoResult.diffTransfer === 0 ? 'bg-purple-50 border-purple-200' : arqueoResult.diffTransfer > 0 ? 'bg-sky-50 border-sky-200' : 'bg-red-50 border-red-200'}`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Mercado Pago</p>
+                    <p className={`text-xl font-black ${arqueoResult.diffTransfer === 0 ? 'text-purple-600' : arqueoResult.diffTransfer > 0 ? 'text-sky-600' : 'text-red-600'}`}>
+                      {arqueoResult.diffTransfer > 0 ? '+' : ''}{formatCurrency(arqueoResult.diffTransfer)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs font-bold text-slate-500 mt-2">
+                  {arqueoResult.diffCash === 0 && arqueoResult.diffTransfer === 0 ? "¡Todo cuadra perfecto! 🎉" : "Hay diferencias respecto al sistema."}
+                </p>
+                <button onClick={() => setArqueoResult(null)} className="w-full bg-slate-100 text-slate-600 font-black uppercase tracking-widest py-3 rounded-xl mt-4 active:scale-95 text-xs">VOLVER A CALCULAR</button>
+              </div>
             )}
           </div>
         </Modal>
