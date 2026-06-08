@@ -218,9 +218,10 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
         
         {/* Cabecera / Logo */}
         <div className="text-center flex flex-col items-center justify-center mb-3 mt-1">
-          <Utensils size={18} className="text-black mb-1" strokeWidth={2.5} />
+         
+          <img size={18} className="text-black mb-1" src="/public/logo.jpg" alt="" />
           <h1 className="text-[14px] font-black uppercase tracking-tighter leading-none">EL QUINCHO COCINA</h1>
-          <p className="text-[7px] font-black tracking-widest uppercase mt-0.5">QUALITY FOOD</p>
+
         </div>
 
         {/* Inputs de arriba (FECHA y CLIENTE) */}
