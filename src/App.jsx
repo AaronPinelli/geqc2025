@@ -206,7 +206,7 @@ const BigButton = ({ icon: Icon, label, onClick, borderColor }) => (
   </button>
 );
 
-// --- TICKET CLÁSICO RESTAURADO (80MM - STANDARD - SIN LOGO) ---
+// --- TICKET CLÁSICO RESTAURADO (58MM - CON LOGO) ---
 const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
   const formatPriceTicket = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
   
@@ -214,54 +214,66 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
   const dateStr = date ? `${date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'})} ${date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false})}` : '';
 
   return (
-    <div id="printable-area" className="hidden print:block bg-white text-black p-4 w-full max-w-[80mm] mx-auto font-mono text-sm leading-tight">
-      <div className="text-center mb-4 border-b border-black pb-2 border-dashed">
-        <h1 className="text-xl font-black uppercase">GEQC</h1>
-        <p className="text-xs">Comprobante de Pedido</p>
-        <p className="text-xs mt-1">{dateStr}</p>
+    <div id="printable-area" className="hidden print:block bg-white text-black p-1 w-full max-w-[58mm] mx-auto font-mono text-[12px] leading-tight print:color-adjust-exact print:print-color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+      
+      {/* --- INICIO ZONA DE LOGO --- */}
+      <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
+        {/* Reemplaza "/logo.png" por la ruta real de tu logo. w-16 h-16 controla el tamaño (64px) */}
+        <img 
+           src="/logo.jpg" 
+           alt="Logo" 
+           className="w-16 h-16 object-contain grayscale mb-1" 
+           onError={(e) => e.target.style.display='none'} 
+        />
+        <h1 className="text-xl font-black uppercase leading-none">GEQC</h1>
+        <p className="text-[11px] mt-1">Comprobante de Pedido</p>
+        <p className="text-[11px] mt-0.5">{dateStr}</p>
       </div>
+      {/* --- FIN ZONA DE LOGO --- */}
 
-      <div className="mb-4 text-xs">
+      <div className="mb-3 text-[11px]">
         <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
         {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
       </div>
 
       <div className="border-b border-black border-dashed mb-2"></div>
       
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-3">
         {cart.map((item, index) => (
-          <div key={`${item.id}-${index}`} className="flex justify-between items-start">
-            <div className="flex flex-col gap-1 w-[70%]">
-              <div className="flex gap-2">
-                 <span className="font-bold">{item.qty}x</span>
-                 <span>{item.name} {item.isManual ? '(M)' : ''}</span>
+          <div key={`${item.id}-${index}`} className="flex justify-between items-start w-full">
+            
+            <div className="flex items-start gap-1.5 flex-1 pr-2">
+              <span className="font-bold whitespace-nowrap">{item.qty}x</span>
+              <div className="flex flex-col w-full">
+                <span className="break-words leading-tight">{item.name} {item.isManual ? '(M)' : ''}</span>
+                {item.note && (
+                   <span className="text-[10px] italic mt-0.5 uppercase">** {item.note} **</span>
+                )}
               </div>
-              {item.note && (
-                 <span className="text-[10px] italic ml-6 uppercase">** {item.note} **</span>
-              )}
             </div>
-            <span className="font-bold whitespace-nowrap">
+
+            <span className="font-bold whitespace-nowrap text-right shrink-0">
               {formatPriceTicket(item.price * item.qty)}
             </span>
+            
           </div>
         ))}
       </div>
 
       <div className="border-t border-black border-dashed pt-2 mb-4">
-        <div className="flex justify-between items-center text-lg font-black">
+        <div className="flex justify-between items-center text-sm font-black">
           <span>TOTAL</span>
           <span>{formatPriceTicket(total)}</span>
         </div>
       </div>
 
-      <div className="text-center text-xs mt-6">
+      <div className="text-center text-[10px] mt-4 mb-2">
         <p>¡Gracias por su compra!</p>
         <p className="mt-1">@el_quincho.cocina</p>
       </div>
     </div>
   );
 };
-
 // --- APP PRINCIPAL ---
 
 export default function App() {
