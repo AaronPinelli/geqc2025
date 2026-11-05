@@ -1855,7 +1855,7 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   setIsDiscountMode(true);
-                  if (!manualItemName) setManualItemName('Descuento especial');
+                  
                 }}
                 className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${isDiscountMode ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-600 hover:text-black'}`}
               >
