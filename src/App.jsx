@@ -1125,8 +1125,8 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-[100dvh] flex flex-col items-center justify-center font-black text-2xl tracking-widest text-white bg-[#034aaa] gap-3">
-        <span>CARGANDO EL QUINCHO...</span>
-        <span className="text-xs text-white/70 font-sans tracking-normal font-normal">Sincronizando menú y caja</span>
+        <span>CARGANDO...</span>
+        
       </div>
     );
   }
@@ -1867,8 +1867,8 @@ export default function App() {
               <AlertCircle size={16} className="shrink-0 mt-0.5"/>
               <span>
                 {isDiscountMode 
-                  ? 'Puedes ingresar un valor negativo como "-1000" o un porcentaje como "10%" para descontar automáticamente sobre el subtotal.' 
-                  : 'Aparecerá en este pedido. Ideal para extras, envíos o adicionales especiales.'}
+                  ? 'podes agregar descuentos o %.' 
+                  : 'Extras o pedidos particulares.'}
               </span>
             </div>
 
@@ -1879,7 +1879,7 @@ export default function App() {
               <input 
                 type="text" 
                 className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-[#034aaa] font-black text-base text-[#034aaa] uppercase" 
-                placeholder={isDiscountMode ? "Ej. Descuento 10% amigo" : "Ej. Envío especial..."} 
+                placeholder={isDiscountMode ? "Ej. Descuento 10% " : "Ej. sanguche sin pan"} 
                 value={manualItemName} 
                 onChange={e => setManualItemName(e.target.value)} 
               />
@@ -1890,9 +1890,7 @@ export default function App() {
                 <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
                   {isDiscountMode ? "Monto o Porcentaje de Descuento" : "Precio"}
                 </label>
-                {isDiscountMode && (
-                  <span className="text-[10px] font-black text-amber-700 uppercase">Acepta -1000 o 10%</span>
-                )}
+                
               </div>
               
               <div className="relative">
@@ -1908,38 +1906,7 @@ export default function App() {
                 />
               </div>
 
-              {/* BOTONES RÁPIDOS DENTRO DEL MODAL */}
-              <div className="grid grid-cols-4 gap-2 mt-2">
-                <button 
-                  type="button" 
-                  onClick={() => { setManualItemPrice('10%'); setIsDiscountMode(true); }} 
-                  className="py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-black text-slate-700"
-                >
-                  10%
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => { setManualItemPrice('15%'); setIsDiscountMode(true); }} 
-                  className="py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-black text-slate-700"
-                >
-                  15%
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => { setManualItemPrice('-500'); setIsDiscountMode(true); }} 
-                  className="py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-black text-slate-700"
-                >
-                  -$500
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => { setManualItemPrice('-1000'); setIsDiscountMode(true); }} 
-                  className="py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-black text-slate-700"
-                >
-                  -$1.000
-                </button>
-              </div>
-            </div>
+           </div>
 
             <button 
               onClick={addManualItemToCart} 
