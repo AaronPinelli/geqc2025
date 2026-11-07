@@ -59,7 +59,8 @@ import {
   serverTimestamp,
   writeBatch, 
   getDocs,
-  setDoc
+  setDoc,
+  enableIndexedDbPersistence
 } from 'firebase/firestore';
 
 // --- CONFIGURACIÓN DE FIREBASE ---
@@ -78,6 +79,11 @@ try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+  // Cache local persistente: acelera las aperturas siguientes y permite leer datos ya descargados sin conexión.
+  enableIndexedDbPersistence(db).catch((err) => {
+    // Puede fallar si el navegador no admite IndexedDB o si otra pestaña ya tomó el control.
+    console.info('Persistencia local de Firestore no disponible en esta sesión:', err.code || err.message);
+  });
 } catch (err) {
   console.warn("Firebase ya inicializado o usando fallback local:", err);
 }
@@ -220,89 +226,60 @@ const BigButton = ({ icon: Icon, label, onClick, borderColor }) => (
 );
 
 // --- TICKET CLÁSICO RESTAURADO (58MM - CON LOGO SUPERIOR Y LOGO AL FINAL) ---
-const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
-  const formatPriceTicket = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
-  
-  const dateStr = date ? `${date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'})} ${date.toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit', hour12: false})}` : '';
+const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, date }) => {
+  const formatPriceTicket = (value) =>
+    `$ ${Math.round(Number(value) || 0).toLocaleString('es-AR')}`;
+
+  const dateValue = date instanceof Date ? date : date?.toDate?.() || (date ? new Date(date) : new Date());
+  const dateStr = dateValue.toLocaleDateString('es-AR', {
+    day: '2-digit', month: '2-digit', year: '2-digit'
+  }) + ' ' + dateValue.toLocaleTimeString('es-AR', {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
 
   return (
-    <div 
-      id="printable-area" 
-      className="hidden print:block bg-white text-black p-1 w-full max-w-[58mm] mx-auto font-mono text-[12px] leading-tight print:color-adjust-exact print:print-color-adjust-exact" 
-      style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
-    >
-      
-      {/* CABECERA */}
-      <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
-        <h1 className="text-xl font-black uppercase leading-none">EL QUINCHO</h1>
-        <p className="text-[11px] mt-1 font-bold">Comprobante de Pedido</p>
-        <p className="text-[11px] mt-0.5">{dateStr}</p>
-      </div>
-
-      <div className="mb-3 text-[11px]">
-        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
-        {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
-      </div>
-
-      <div className="border-b border-black border-dashed mb-2"></div>
-      
-      {/* DETALLE ITEMS */}
-      <div className="flex flex-col gap-2 mb-3">
+    <section id="printable-area" aria-label="Ticket de pedido">
+      <header className="ticket-header">
+        <h1>EL QUINCHO</h1>
+        <p>COMANDA DE PEDIDO</p>
+        <p>{dateStr}</p>
+      </header>
+      <section className="ticket-customer">
+        <p><strong>CLIENTE:</strong> {customerName?.trim() || 'MOSTRADOR'}</p>
+        {customerAddress?.trim() && <p><strong>DIRECCIÓN:</strong> {customerAddress}</p>}
+      </section>
+      <div className="ticket-separator" />
+      <div className="ticket-items">
         {cart.map((item, index) => {
-          const itemSubtotal = item.price * item.qty;
-          const isDiscount = item.price < 0;
+          const quantity = Number(item.qty) || 0;
+          const subtotal = (Number(item.price) || 0) * quantity;
+          const discount = subtotal < 0 || item.isDiscount;
           return (
-            <div key={`${item.id}-${index}`} className="flex justify-between items-start w-full">
-              <div className="flex items-start gap-1.5 flex-1 pr-2">
-                <span className="font-bold whitespace-nowrap">{item.qty}x</span>
-                <div className="flex flex-col w-full">
-                  <span className={`break-words leading-tight ${isDiscount ? 'font-bold underline' : ''}`}>
-                    {item.name} {item.isManual && !isDiscount ? '(M)' : ''}
-                  </span>
-                  {item.note && (
-                    <span className="text-[10px] italic mt-0.5 uppercase">** {item.note} **</span>
-                  )}
+            <div className="ticket-item" key={`${item.id || item.name}-${index}`}>
+              <div className="ticket-item-description">
+                <strong>{quantity}x</strong>
+                <div>
+                  <div className={discount ? 'ticket-discount' : ''}>
+                    {item.name}{item.isManual && !discount ? ' (M)' : ''}
+                  </div>
+                  {item.note && <small>Nota: {item.note}</small>}
                 </div>
               </div>
-
-              <span className={`font-bold whitespace-nowrap text-right shrink-0 ${isDiscount ? 'text-black' : ''}`}>
-                {formatPriceTicket(itemSubtotal)}
-              </span>
+              <strong className="ticket-item-price">{formatPriceTicket(subtotal)}</strong>
             </div>
           );
         })}
       </div>
-
-      <div className="border-t border-black border-dashed pt-2 mb-3">
-        <div className="flex justify-between items-center text-sm font-black">
-          <span>TOTAL</span>
-          <span>{formatPriceTicket(total)}</span>
-        </div>
+      <div className="ticket-total">
+        <strong>TOTAL</strong>
+        <strong>{formatPriceTicket(total)}</strong>
       </div>
-
-      {/* PIE DE PÁGINA CON LOGO DEL QUINCHO */}
-      <div className="text-center text-[11px] mt-3 mb-1 border-t border-black/30 pt-2 flex flex-col items-center">
-        <p className="font-bold">¡Muchas gracias por su compra!</p>
-        <p className="text-[10px] mt-0.5">@el_quincho.cocina</p>
-        
-        {/* LOGO SOLICITADO AL FINAL DE TODO */}
-        <div className="mt-2.5 flex justify-center items-center">
-          <img 
-            src="/logo.jpg" 
-            alt="Logo El Quincho" 
-            className="w-16 h-16 object-contain filter grayscale contrast-200"
-            onError={(e) => {
-              // Si aún no está colocada la imagen en el directorio public, mostramos un badge estilizado térmico
-              e.target.style.display = 'none';
-              if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
-            }} 
-          />
-          <div style={{ display: 'none' }} className="border-2 border-black rounded-full w-14 h-14 flex items-center justify-center font-black text-[10px] uppercase text-center p-1 leading-none">
-            EL QUINCHO
-          </div>
-        </div>
-      </div>
-    </div>
+      <footer className="ticket-footer">
+        <strong>¡GRACIAS POR TU COMPRA!</strong>
+        <span>@el_quincho.cocina</span>
+       <img src="./logo.jpg" alt="Logo El Quincho" className="ticket-logo" />
+      </footer>
+    </section>
   );
 };
 
@@ -391,28 +368,41 @@ export default function App() {
   // --- Auth & Data con soporte offline/demo reactivo ---
   useEffect(() => {
     let unsubscribe = () => {};
-    const initAuth = async () => {
+    let cancelled = false;
+    const useLocalMode = () => {
+      if (cancelled) return;
+      setUser({ uid: 'demo-local-user' });
+      setMenuItems(INITIAL_MENU.map((m, idx) => ({ id: `menu-${idx}`, ...m })));
+      setLoading(false);
+    };
+
+    if (!auth) {
+      useLocalMode();
+      return () => { cancelled = true; };
+    }
+
+    // Primero escuchamos el estado de autenticación; después iniciamos sesión si hace falta.
+    unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (cancelled) return;
+      if (currentUser) {
+        setUser(currentUser);
+        return;
+      }
       try {
-        if (auth) {
-          await signInAnonymously(auth);
-          unsubscribe = onAuthStateChanged(auth, (u) => {
-            setUser(u || { uid: 'demo-local-user' });
-            setLoading(false);
-          });
-        } else {
-          setUser({ uid: 'demo-local-user' });
-          setMenuItems(INITIAL_MENU.map((m, idx) => ({ id: `menu-${idx}`, ...m })));
-          setLoading(false);
-        }
+        await signInAnonymously(auth);
       } catch (e) {
         console.warn("Entrando en modo local reactivo:", e);
-        setUser({ uid: 'demo-local-user' });
-        setMenuItems(INITIAL_MENU.map((m, idx) => ({ id: `menu-${idx}`, ...m })));
-        setLoading(false);
+        useLocalMode();
       }
+    }, (error) => {
+      console.warn("Error de autenticación; usando modo local:", error);
+      useLocalMode();
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
     };
-    initAuth();
-    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -724,15 +714,26 @@ export default function App() {
     } catch(e) { console.error(e); }
   };
 
-  const handlePrint = (dataToPrint = null) => {
-    if (dataToPrint) { 
-      setPrintData(dataToPrint); 
-    } else { 
-      setPrintData({ cart, total: cartTotal, customerName, customerAddress, date: new Date() }); 
+  const handlePrint = async (dataToPrint = null) => {
+    const ticketData = dataToPrint || {
+      cart: [...cart],
+      total: cartTotal,
+      customerName,
+      customerAddress,
+      date: new Date()
+    };
+
+    setPrintData(ticketData);
+    // Dos frames permiten que React monte el ticket antes de abrir la impresión.
+    await new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    try {
+      window.print();
+    } finally {
+      setPrintData(null);
     }
-    setTimeout(() => { 
-      window.print(); 
-    }, 150);
   };
 
   const handleSaveItem = async () => {
@@ -1008,15 +1009,24 @@ export default function App() {
         setOrders(prev => [{ id: `ord-${Date.now()}`, ...newOrderData }, ...prev]);
       }
 
-      if (window.confirm("¿Deseas imprimir el Ticket de Comanda?")) {
-        handlePrint({ cart, total: cartTotal, customerName, customerAddress, date: new Date() });
-      }
-      
-      setCart([]); 
-      setCustomerName(''); 
+      const ticketToPrint = {
+        cart: [...cart],
+        total: cartTotal,
+        customerName: customerName.trim(),
+        customerAddress: customerAddress.trim(),
+        date: new Date()
+      };
+
+      setCart([]);
+      setCustomerName('');
       setCustomerAddress('');
       setIsCartOpen(false);
-      showToast("Pedido guardado exitosamente");
+
+      if (window.confirm("Pedido guardado. ¿Imprimir la comanda ahora?")) {
+        await handlePrint(ticketToPrint);
+      } else {
+        showToast("Pedido guardado correctamente");
+      }
     } catch (e) { 
       console.error(e); 
       showToast("Error al guardar pedido"); 
@@ -1153,6 +1163,39 @@ export default function App() {
   return (
     <div className="min-h-[100dvh] bg-[#034aaa] font-sans text-black flex flex-col relative select-none">
       
+      <style>{`
+        #printable-area { display: none; }
+        @page { size: 58mm auto; margin: 0; }
+        @media print {
+          html, body { width: 58mm !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+          body * { visibility: hidden !important; }
+          #printable-area, #printable-area * { visibility: visible !important; }
+          #printable-area {
+            display: block !important; position: absolute !important; left: 0 !important; top: 0 !important;
+            width: 58mm !important; max-width: 58mm !important; margin: 0 !important; padding: 3mm !important;
+            box-sizing: border-box !important; color: #000 !important; background: #fff !important;
+            font-family: Arial, Helvetica, sans-serif !important; font-size: 10pt !important; line-height: 1.2 !important;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+          }
+          #printable-area * { box-sizing: border-box !important; }
+          .ticket-header { text-align: center; padding-bottom: 7px; margin-bottom: 8px; border-bottom: 1px dashed #000; }
+          .ticket-header h1 { margin: 0 0 3px; font-size: 19pt; line-height: 1.05; font-weight: 900; letter-spacing: .5px; }
+          .ticket-header p { margin: 2px 0 0; font-size: 9pt; font-weight: 700; }
+          .ticket-customer { margin: 0 0 8px; overflow-wrap: anywhere; font-size: 9.5pt; }
+          .ticket-customer p { margin: 2px 0; }
+          .ticket-separator { border-top: 1px dashed #000; margin: 6px 0 8px; }
+          .ticket-items { display: block; }
+          .ticket-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 5px; margin: 0 0 7px; width: 100%; break-inside: avoid; }
+          .ticket-item-description { display: flex; align-items: flex-start; gap: 5px; min-width: 0; flex: 1; overflow-wrap: anywhere; }
+          .ticket-item-description > strong { white-space: nowrap; }
+          .ticket-item-price { white-space: nowrap; text-align: right; }
+          .ticket-item small { display: block; margin-top: 2px; font-size: 8pt; overflow-wrap: anywhere; }
+          .ticket-discount { font-weight: 900; text-decoration: underline; }
+          .ticket-total { display: flex; justify-content: space-between; gap: 5px; padding-top: 8px; margin-top: 8px; border-top: 1px dashed #000; font-size: 13pt; font-weight: 900; }
+          .ticket-footer { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; padding-top: 9px; margin-top: 10px; border-top: 1px dashed #000; font-size: 9pt; }
+        }
+      `}</style>
+
       {/* Notificación flotante para confirmaciones */}
       {customFeedbackMessage && (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
