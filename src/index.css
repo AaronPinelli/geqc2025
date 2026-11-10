@@ -19,7 +19,42 @@ html, body, #root {
 body { min-height: 100vh; }
 button, input, textarea, select { font: inherit; }
 
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0mm !important;
+  }
 
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 58mm !important;
+  }
+
+  /* Oculta la interfaz de la app en la impresion */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Asegura visibilidad del area de impresion */
+  #printable-area {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    box-sizing: border-box !important;
+    padding: 2mm 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #printable-area * {
+    visibility: visible !important;
+  }
+}
 
 .ticket-logo {
   display: block;
