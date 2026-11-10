@@ -238,107 +238,69 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
   });
 
   return (
-    <div id="printable-area" className="hidden print:block bg-white text-black p-1 w-full max-w-[58mm] mx-auto font-mono text-[12px] leading-tight print:color-adjust-exact print:print-color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-
-      
-
+    <div
+      id="printable-area"
+      className="hidden print:block bg-white text-black font-mono leading-tight"
+      style={{
+        width: '58mm',
+        maxWidth: '58mm',
+        margin: '0 auto',
+        padding: '2mm',
+        boxSizing: 'border-box',
+        WebkitPrintColorAdjust: 'exact',
+        printColorAdjust: 'exact',
+        color: '#000000',
+        fontSize: '11px'
+      }}
+    >
       {/* --- INICIO ZONA DE LOGO --- */}
-
-      <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
-
-        {/* Reemplaza "/logo.png" por la ruta real de tu logo. w-16 h-16 controla el tamaño (64px) */}
-
-
-        <h1 className="text-xl font-black uppercase leading-none">GEQC</h1>
-
-        <p className="text-[11px] mt-1">Comprobante de Pedido</p>
-
-        <p className="text-[11px] mt-0.5">{dateStr}</p>
-
+      <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '6px', marginBottom: '8px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: '900', margin: 0, textTransform: 'uppercase' }}>GEQC</h1>
+        <p style={{ fontSize: '10px', margin: '2px 0 0 0' }}>Comprobante de Pedido</p>
+        <p style={{ fontSize: '10px', margin: '2px 0 0 0' }}>{dateStr}</p>
       </div>
-
       {/* --- FIN ZONA DE LOGO --- */}
 
-
-      <div className="mb-3 text-[11px]">
-
-        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
-
-        {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
-
-      </div><br />
-
-
-      <div className="border-b border-black border-dashed mb-2"></div>
-
-      
-
-      <div className="flex flex-col gap-2 mb-3">
-
-        {cart.map((item, index) => (
-
-          <div key={`${item.id}-${index}`} className="flex justify-between items-start w-full">
-
-            
-
-            <div className="flex items-start gap-1.5 flex-1 pr-2">
-
-              <span className="font-bold whitespace-nowrap">{item.qty}x</span>
-
-              <div className="flex flex-col w-full">
-
-                <span className="break-words leading-tight">{item.name} {item.isManual ? '(M)' : ''}</span>
-
-                {item.note && (
-
-                   <span className="text-[10px] italic mt-0.5 uppercase">** {item.note} **</span>
-
-                )}
-
-              </div>
-
-            </div>
-
-
-            <span className="font-bold whitespace-nowrap text-right shrink-0">
-
-              {formatPriceTicket(item.price * item.qty)}
-
-            </span>
-
-            
-
-          </div>
-
-        ))}
-
-      </div><br />
-
-
-      <div className="border-t border-black border-dashed pt-2 mb-4">
-
-        <div className="flex justify-between items-center text-sm font-black">
-
-          <span>TOTAL</span>
-
-          <span>{formatPriceTicket(total)}</span>
-
-        </div>
-
-      </div><br />
-
-
-      <div className="text-center text-[10px] mt-4 mb-2">
-
-        <p>¡Gracias por su compra!</p>
-
-        <p className="mt-1">@el_quincho.cocina</p>
-
+      <div style={{ fontSize: '11px', marginBottom: '8px' }}>
+        <p style={{ margin: '2px 0' }}><strong>Cliente:</strong> {customerName || 'Mostrador'}</p>
+        {customerAddress && <p style={{ margin: '2px 0' }}><strong>Dir:</strong> {customerAddress}</p>}
       </div>
-      <img src="./logo.jpg" alt="Logo El Quincho" className="ticket-logo" />
 
+      <div style={{ borderBottom: '1px dashed #000', marginBottom: '8px' }}></div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+        {cart.map((item, index) => (
+          <div key={`${item.id}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, paddingRight: '4px' }}>
+              <span style={{ fontWeight: 'bold' }}>{item.qty}x </span>
+              <span style={{ wordBreak: 'break-word', lineHeight: '1.2' }}>{item.name} {item.isManual ? '(M)' : ''}</span>
+              {item.note && (
+                <div style={{ fontSize: '9px', fontStyle: 'italic', textTransform: 'uppercase', marginTop: '2px' }}>
+                  ** {item.note} **
+                </div>
+              )}
+            </div>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+              {formatPriceTicket(item.price * item.qty)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ borderTop: '1px dashed #000', paddingTop: '6px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '900' }}>
+          <span>TOTAL</span>
+          <span>{formatPriceTicket(total)}</span>
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '8px' }}>
+        <p style={{ margin: '2px 0' }}>¡Gracias por su compra!</p>
+        <p style={{ margin: '2px 0' }}>@el_quincho.cocina</p>
+      </div>
+      
+      <img src="/logo.jpg" alt="Logo El Quincho" className="ticket-logo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
     </div>
-
   );
 };
 
