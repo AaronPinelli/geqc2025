@@ -312,7 +312,7 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
         <p>@el_quincho.cocina</p>
 
         <img
-          src="/logo5to.png"
+          src="public/logo5to.png"
           alt="Logo El Quincho Cocina"
           className="ticket-logo"
         />
@@ -1271,14 +1271,15 @@ export default function App() {
   }
 
   .ticket-header h1 {
-    margin: 0 0 4px;
+    margin: auto;
     font-size: 16pt;
     line-height: 1.1;
     font-weight: 900;
   }
 
   .ticket-header p {
-    margin: 2px 0;
+  margin : auto ;
+    
     font-size: 9pt;
   }
 
@@ -1339,10 +1340,12 @@ export default function App() {
   }
 
   .ticket-total {
+      align: center;
     display: flex;
     justify-content: space-between;
     gap: 5px;
     padding-top: 8px;
+    margin: auto;
     margin-top: 8px;
     border-top: 1px dashed black;
     font-size: 12pt;
