@@ -20,33 +20,6 @@ body { min-height: 100vh; }
 button, input, textarea, select { font: inherit; }
 
 
-@media print {
-  /* Forzar tamaño de papel y quitar márgenes del navegador */
-  @page {
-    margin: 0 !important;
-    size: 58mm auto !important;
-  }
-
-  /* Resetear el fondo de la app entera a blanco puro */
-  html, body, #root {
-    background-color: #ffffff !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 58mm !important;
-  }
-
-  /* Ocultar la app principal (Tailwind) */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Desactivar flexbox del contenedor principal de la app que rompe el ticket */
-  body > div {
-    display: block !important;
-    background: white !important;
-    min-height: 0 !important;
-  }
-}
 
 .ticket-logo {
   display: block;
