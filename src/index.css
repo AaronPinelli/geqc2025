@@ -2,23 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #0f172a;
-  background: #034aaa;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
-
-html, body, #root {
-  min-width: 320px;
-  min-height: 100%;
-  margin: 0;
-}
-
-body { min-height: 100vh; }
-button, input, textarea, select { font: inherit; }
-
 @media print {
   @page {
     size: 58mm auto;
@@ -33,20 +16,17 @@ button, input, textarea, select { font: inherit; }
     width: 58mm !important;
   }
 
-  /* Oculta la interfaz de la app en la impresion */
   .print\:hidden {
     display: none !important;
   }
 
-  /* Asegura visibilidad del area de impresion */
   #printable-area {
     display: block !important;
     visibility: visible !important;
-    position: relative !important;
-    width: 58mm !important;
-    max-width: 58mm !important;
-    box-sizing: border-box !important;
-    padding: 2mm 3mm !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 48mm !important; /* 48mm es el ancho de impresión real de un papel de 58mm */
     background: #ffffff !important;
     color: #000000 !important;
   }
@@ -54,14 +34,4 @@ button, input, textarea, select { font: inherit; }
   #printable-area * {
     visibility: visible !important;
   }
-}
-
-.ticket-logo {
-  display: block;
-  width: 100%;
-  max-width: 45mm; /* Evita que el logo se desborde de los 58mm */
-  height: auto;
-  margin: 10px auto 0;
-  filter: grayscale(100%) contrast(150%);
-  mix-blend-mode: multiply; /* Quita los bordes negros */
 }

@@ -245,114 +245,121 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
     hour12: false
   })}`;
 
+  const separator = "--------------------------------";
+
   return (
     <div
       id="printable-area"
-      className="hidden print:block font-mono text-black bg-white"
+      className="hidden print:block text-black bg-white"
       style={{
-        width: '58mm',
-        maxWidth: '58mm',
-        margin: '0 auto',
-        padding: '2mm 3mm',
-        boxSizing: 'border-box',
+        width: '48mm',
+        maxWidth: '48mm',
+        margin: '0',
+        padding: '0',
+        fontFamily: '"Courier New", Courier, monospace',
         fontSize: '11px',
-        lineHeight: '1.25',
+        lineHeight: '1.2',
         color: '#000000',
         backgroundColor: '#ffffff'
       }}
     >
-      {/* Encabezado */}
-      <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '6px', marginBottom: '6px' }}>
-        <h1 style={{ fontSize: '18px', fontWeight: '900', margin: '0 0 2px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+      {/* Encabezado centrado */}
+      <div style={{ textAlign: 'center', width: '100%', marginBottom: '4px' }}>
+        <div style={{ fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px', lineHeight: '1' }}>
           GEQC
-        </h1>
-        <p style={{ margin: '0', fontSize: '10px', textTransform: 'uppercase' }}>Comprobante de Pedido</p>
-        <p style={{ margin: '2px 0 0 0', fontSize: '10px' }}>{dateStr}</p>
+        </div>
+        <div style={{ fontSize: '10px', marginTop: '2px' }}>Comprobante de Pedido</div>
+        <div style={{ fontSize: '10px', marginTop: '2px' }}>{dateStr}</div>
+      </div>
+
+      {/* Línea divisoria física por caracteres */}
+      <div style={{ textAlign: 'center', letterSpacing: '-1px', overflow: 'hidden', height: '12px' }}>
+        {separator}
       </div>
 
       {/* Datos del Cliente */}
-      <div style={{ marginBottom: '6px', fontSize: '11px' }}>
-        <p style={{ margin: '2px 0' }}>
-          <strong>Cliente:</strong> {customerName || 'Mostrador'}
-        </p>
-        {customerAddress && (
-          <p style={{ margin: '2px 0' }}>
-            <strong>Dir:</strong> {customerAddress}
-          </p>
-        )}
+      <div style={{ fontSize: '11px', marginBottom: '4px' }}>
+        <div><strong>Cliente:</strong> {customerName || 'Mostrador'}</div>
+        {customerAddress && <div><strong>Dir:</strong> {customerAddress}</div>}
       </div>
 
-      {/* Tabla de Articulos */}
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px', fontSize: '11px' }}>
-        <thead>
-          <tr style={{ borderBottom: '1px dashed #000' }}>
-            <th style={{ textAlign: 'left', paddingBottom: '3px', width: '24px' }}>Cant</th>
-            <th style={{ textAlign: 'left', paddingBottom: '3px' }}>Detalle</th>
-            <th style={{ textAlign: 'right', paddingBottom: '3px', whiteSpace: 'nowrap' }}>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cart.map((item, idx) => (
-            <tr key={`${item.id}-${idx}`} style={{ verticalAlign: 'top' }}>
-              <td style={{ fontWeight: 'bold', paddingTop: '4px' }}>
-                {item.qty}x
-              </td>
-              <td style={{ paddingTop: '4px', paddingRight: '4px', wordBreak: 'break-word' }}>
+      {/* Línea divisoria */}
+      <div style={{ textAlign: 'center', letterSpacing: '-1px', overflow: 'hidden', height: '12px' }}>
+        {separator}
+      </div>
+
+      {/* Detalle de Artículos */}
+      <div style={{ marginBottom: '4px' }}>
+        {cart.map((item, idx) => (
+          <div key={`${item.id}-${idx}`} style={{ marginBottom: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: '1', paddingRight: '4px' }}>
+                <span style={{ fontWeight: 'bold' }}>{item.qty}x </span>
                 <span>{item.name} {item.isManual ? '(M)' : ''}</span>
-                {item.note && (
-                  <div style={{ fontSize: '9px', fontStyle: 'italic', textTransform: 'uppercase', marginTop: '1px' }}>
-                    ** {item.note} **
-                  </div>
-                )}
-              </td>
-              <td style={{ textAlign: 'right', fontWeight: 'bold', paddingTop: '4px', whiteSpace: 'nowrap' }}>
+              </div>
+              <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                 {formatPriceTicket(item.price * item.qty)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </div>
+            {item.note && (
+              <div style={{ fontSize: '10px', paddingLeft: '14px', textTransform: 'uppercase' }}>
+                ** {item.note} **
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Línea divisoria */}
+      <div style={{ textAlign: 'center', letterSpacing: '-1px', overflow: 'hidden', height: '12px' }}>
+        {separator}
+      </div>
 
       {/* Total */}
-      <div style={{ borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '6px 0', margin: '6px 0 8px 0' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: '900' }}>
-          <span>TOTAL</span>
-          <span>{formatPriceTicket(total)}</span>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 'bold', margin: '4px 0' }}>
+        <span>TOTAL</span>
+        <span>{formatPriceTicket(total)}</span>
       </div>
 
-      {/* Pie y Redes */}
-      <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '6px' }}>
-        <p style={{ margin: '1px 0' }}>¡Gracias por su compra!</p>
-        <p style={{ margin: '1px 0', fontWeight: 'bold' }}>@el_quincho.cocina</p>
+      {/* Línea divisoria */}
+      <div style={{ textAlign: 'center', letterSpacing: '-1px', overflow: 'hidden', height: '12px' }}>
+        {separator}
       </div>
 
-      {/* Logo al final optimizado para impresion termica */}
-      <div style={{ textAlign: 'center', marginTop: '8px' }}>
+      {/* Pie centrado */}
+      <div style={{ textAlign: 'center', width: '100%', fontSize: '10px', marginTop: '4px' }}>
+        <div>¡Gracias por su compra!</div>
+        <div style={{ fontWeight: 'bold', marginTop: '2px' }}>@el_quincho.cocina</div>
+      </div>
+
+      {/* Logo optimizado para que no se empaste en negro */}
+      <div style={{ textAlign: 'center', width: '100%', marginTop: '8px' }}>
         <img
           src="/logo5to.png"
-          alt="El Quincho Cocina"
+          alt="Logo"
           style={{
-            display: 'block',
+            display: 'inline-block',
             margin: '0 auto',
-            width: '38mm',
+            width: '32mm',
             height: 'auto',
-            maxHeight: '26mm',
+            maxHeight: '22mm',
             objectFit: 'contain',
-            filter: 'grayscale(100%) contrast(180%)',
-            mixBlendMode: 'multiply'
+            imageRendering: 'pixelated',
+            filter: 'grayscale(100%) contrast(200%) brightness(110%)'
           }}
           onError={(e) => {
-            // Si no encuentra /logo.jpg, prueba con /logo.png antes de ocultarse
             if (!e.currentTarget.dataset.retried) {
               e.currentTarget.dataset.retried = 'true';
-              e.currentTarget.src = '/logo.png';
+              e.currentTarget.src = '/logo.jpg';
             } else {
               e.currentTarget.style.display = 'none';
             }
           }}
         />
       </div>
+
+      {/* Espacio final para que corte el papel sin tapar el logo */}
+      <div style={{ height: '8mm' }}></div>
     </div>
   );
 };
