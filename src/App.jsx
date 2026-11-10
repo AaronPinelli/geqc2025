@@ -342,9 +342,7 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
             margin: '0 auto',
             width: '32mm',
             height: 'auto',
-            maxHeight: '22mm',
-            objectFit: 'contain',
-            imageRendering: 'pixelated',
+            
             
           }}
           onError={(e) => {
