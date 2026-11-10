@@ -328,14 +328,14 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
 
       {/* Pie centrado */}
       <div style={{ textAlign: 'center', width: '100%', fontSize: '10px', marginTop: '4px' }}>
-        <div>¡Gracias por su compra!</div>
-        <div style={{ fontWeight: 'bold', marginTop: '2px' }}>@el_quincho.cocina</div>
+        <divstyle={{ textAlign: 'center', width: '100%', fontSize: '10px' }}>¡Gracias por su compra!</div>
+        <div sstyle={{ textAlign: 'center', width: '100%', fontSize: '10px' }}>@el_quincho.cocina</div>
       </div>
 
       {/* Logo optimizado para que no se empaste en negro */}
       <div style={{ textAlign: 'center', width: '100%', marginTop: '8px' }}>
         <img
-          src="/logo5to.png"
+          src="/logo.jpg"
           alt="Logo"
           style={{
             display: 'inline-block',
