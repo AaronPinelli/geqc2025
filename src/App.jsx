@@ -238,48 +238,107 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
   });
 
   return (
-    <section id="printable-area" aria-label="Ticket de pedido">
-      <header className="ticket-header">
-        <h1>EL QUINCHO</h1>
-        <p>COMANDA DE PEDIDO</p>
-        <p>{dateStr}</p>
-      </header>
-      <section className="ticket-customer">
-        <p><strong>CLIENTE:</strong> {customerName?.trim() || 'MOSTRADOR'}</p>
-        {customerAddress?.trim() && <p><strong>DIRECCIÓN:</strong> {customerAddress}</p>}
-      </section>
-      <div className="ticket-separator" />
-      <div className="ticket-items">
-        {cart.map((item, index) => {
-          const quantity = Number(item.qty) || 0;
-          const subtotal = (Number(item.price) || 0) * quantity;
-          const discount = subtotal < 0 || item.isDiscount;
-          return (
-            <div className="ticket-item" key={`${item.id || item.name}-${index}`}>
-              <div className="ticket-item-description">
-                <strong>{quantity}x</strong>
-                <div>
-                  <div className={discount ? 'ticket-discount' : ''}>
-                    {item.name}{item.isManual && !discount ? ' (M)' : ''}
-                  </div>
-                  {item.note && <small>Nota: {item.note}</small>}
-                </div>
+    <div id="printable-area" className="hidden print:block bg-white text-black p-1 w-full max-w-[58mm] mx-auto font-mono text-[12px] leading-tight print:color-adjust-exact print:print-color-adjust-exact" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+
+      
+
+      {/* --- INICIO ZONA DE LOGO --- */}
+
+      <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
+
+        {/* Reemplaza "/logo.png" por la ruta real de tu logo. w-16 h-16 controla el tamaño (64px) */}
+
+
+        <h1 className="text-xl font-black uppercase leading-none">GEQC</h1>
+
+        <p className="text-[11px] mt-1">Comprobante de Pedido</p>
+
+        <p className="text-[11px] mt-0.5">{dateStr}</p>
+
+      </div>
+
+      {/* --- FIN ZONA DE LOGO --- */}
+
+
+      <div className="mb-3 text-[11px]">
+
+        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
+
+        {customerAddress && <p><span className="font-bold">Dir:</span> {customerAddress}</p>}
+
+      </div><br />
+
+
+      <div className="border-b border-black border-dashed mb-2"></div>
+
+      
+
+      <div className="flex flex-col gap-2 mb-3">
+
+        {cart.map((item, index) => (
+
+          <div key={`${item.id}-${index}`} className="flex justify-between items-start w-full">
+
+            
+
+            <div className="flex items-start gap-1.5 flex-1 pr-2">
+
+              <span className="font-bold whitespace-nowrap">{item.qty}x</span>
+
+              <div className="flex flex-col w-full">
+
+                <span className="break-words leading-tight">{item.name} {item.isManual ? '(M)' : ''}</span>
+
+                {item.note && (
+
+                   <span className="text-[10px] italic mt-0.5 uppercase">** {item.note} **</span>
+
+                )}
+
               </div>
-              <strong className="ticket-item-price">{formatPriceTicket(subtotal)}</strong>
+
             </div>
-          );
-        })}
+
+
+            <span className="font-bold whitespace-nowrap text-right shrink-0">
+
+              {formatPriceTicket(item.price * item.qty)}
+
+            </span>
+
+            
+
+          </div>
+
+        ))}
+
+      </div><br />
+
+
+      <div className="border-t border-black border-dashed pt-2 mb-4">
+
+        <div className="flex justify-between items-center text-sm font-black">
+
+          <span>TOTAL</span>
+
+          <span>{formatPriceTicket(total)}</span>
+
+        </div>
+
+      </div><br />
+
+
+      <div className="text-center text-[10px] mt-4 mb-2">
+
+        <p>¡Gracias por su compra!</p>
+
+        <p className="mt-1">@el_quincho.cocina</p>
+
       </div>
-      <div className="ticket-total">
-        <strong>TOTAL</strong>
-        <strong>{formatPriceTicket(total)}</strong>
-      </div>
-      <footer className="ticket-footer">
-        <strong>¡GRACIAS POR TU COMPRA!</strong>
-        <span>@el_quincho.cocina</span>
-       <img src="./logo.jpg" alt="Logo El Quincho" className="ticket-logo" />
-      </footer>
-    </section>
+      <img src="./logo.jpg" alt="Logo El Quincho" className="ticket-logo" />
+
+    </div>
+
   );
 };
 
