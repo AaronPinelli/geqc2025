@@ -328,7 +328,7 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
 
       {/* Pie centrado */}
       <div style={{ textAlign: 'center', width: '100%', fontSize: '10px', marginTop: '4px' }}>
-        <divstyle={{ textAlign: 'center', width: '100%', fontSize: '10px' }}>¡Gracias por su compra!</div>
+        <div style={{ textAlign: 'center', width: '100%', fontSize: '10px' }}>¡Gracias por su compra!</div>
         <div sstyle={{ textAlign: 'center', width: '100%', fontSize: '10px' }}>@el_quincho.cocina</div>
       </div>
 
