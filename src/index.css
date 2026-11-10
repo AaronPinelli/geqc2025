@@ -1,37 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@media print {
+  /* Forzar tamaño de papel y quitar márgenes del navegador */
+  @page {
+    margin: 0 !important;
+    size: 58mm auto !important;
+  }
 
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #0f172a;
-  background: #034aaa;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Resetear el fondo de la app entera a blanco puro */
+  html, body, #root {
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 58mm !important;
+  }
+
+  /* Ocultar la app principal (Tailwind) */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Desactivar flexbox del contenedor principal de la app que rompe el ticket */
+  body > div {
+    display: block !important;
+    background: white !important;
+    min-height: 0 !important;
+  }
 }
-
-html, body, #root {
-  min-width: 320px;
-  min-height: 100%;
-  margin: 0;
-}
-
-body { min-height: 100vh; }
-button, input, textarea, select { font: inherit; }
-
-
 
 .ticket-logo {
   display: block;
-  width: 90px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 45mm; /* Evita que el logo se desborde de los 58mm */
   height: auto;
-  object-fit: contain;
   margin: 10px auto 0;
-  filter: grayscale(100%) contrast(120%);
-  border: none !important;
-  outline: none !important;
-  background: transparent;
-  /* El multiply elimina los falsos bordes negros al imprimir JPGs */
-  mix-blend-mode: multiply; 
+  filter: grayscale(100%) contrast(150%);
+  mix-blend-mode: multiply; /* Quita los bordes negros */
 }
