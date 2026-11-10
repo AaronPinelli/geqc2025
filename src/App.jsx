@@ -227,8 +227,8 @@ const BigButton = ({ icon: Icon, label, onClick, borderColor }) => (
 
 // --- TICKET CLÁSICO RESTAURADO (58MM - CON LOGO SUPERIOR Y LOGO AL FINAL) ---
 
-const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
 
+const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) => {
   const formatPriceTicket = (val) =>
     new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -248,79 +248,91 @@ const PrintableTicket = ({ cart, total, customerName, customerAddress, date }) =
     : '';
 
   return (
-    <div id="printable-area">
+    <div
+      id="printable-area"
+      className="hidden print:block bg-white text-black p-1 w-full max-w-[58mm] mx-auto font-mono text-[12px] leading-tight print:color-adjust-exact print:print-color-adjust-exact"
+      style={{
+        WebkitPrintColorAdjust: 'exact',
+        printColorAdjust: 'exact'
+      }}
+    >
+      <div className="text-center mb-3 border-b border-black pb-2 border-dashed flex flex-col items-center">
 
-      {/* ENCABEZADO */}
-      <div className="ticket-header">
-        <h1>EL QUINCHO COCINA</h1>
-        <p>Comprobante de Pedido</p>
-        <p>{dateStr}</p>
+        <img
+          src="/logo5to.png"
+          alt="Logo El Quincho Cocina"
+          className="w-16 h-16 object-contain mb-2"
+          style={{
+            filter: 'grayscale(100%) contrast(180%)',
+            WebkitPrintColorAdjust: 'exact',
+            printColorAdjust: 'exact'
+          }}
+        />
+
+        <h1 className="text-xl font-black uppercase leading-none">
+          GEQC
+        </h1>
+
+        <p className="text-[11px] mt-1">Comprobante de Pedido</p>
+        <p className="text-[11px] mt-0.5">{dateStr}</p>
       </div>
 
-      {/* CLIENTE */}
-      <div className="ticket-customer">
-        <p>
-          <strong>Cliente:</strong> {customerName || 'Mostrador'}
-        </p>
-
+      <div className="mb-3 text-[11px]">
+        <p><span className="font-bold">Cliente:</span> {customerName || 'Mostrador'}</p>
         {customerAddress && (
-          <p>
-            <strong>Dirección:</strong> {customerAddress}
-          </p>
+          <p><span className="font-bold">Dir:</span> {customerAddress}</p>
         )}
       </div>
+      <br />
 
-      <div className="ticket-separator"></div>
+      <div className="border-b border-black border-dashed mb-2"></div>
 
-      {/* PRODUCTOS */}
-      <div className="ticket-items">
+      <div className="flex flex-col gap-2 mb-3">
         {cart.map((item, index) => (
           <div
             key={`${item.id}-${index}`}
-            className="ticket-item"
+            className="flex justify-between items-start w-full"
           >
-            <div className="ticket-item-description">
-              <strong>{item.qty}x</strong>
+            <div className="flex items-start gap-1.5 flex-1 pr-2">
+              <span className="font-bold whitespace-nowrap">{item.qty}x</span>
 
-              <div>
-                <span>
+              <div className="flex flex-col w-full">
+                <span className="break-words leading-tight">
                   {item.name} {item.isManual ? '(M)' : ''}
                 </span>
 
                 {item.note && (
-                  <small>** {item.note} **</small>
+                  <span className="text-[10px] italic mt-0.5 uppercase">
+                    ** {item.note} **
+                  </span>
                 )}
               </div>
             </div>
 
-            <strong className="ticket-item-price">
+            <span className="font-bold whitespace-nowrap text-right shrink-0">
               {formatPriceTicket(item.price * item.qty)}
-            </strong>
+            </span>
           </div>
         ))}
       </div>
+      <br />
 
-      {/* TOTAL */}
-      <div className="ticket-total">
-        <span>TOTAL</span>
-        <span>{formatPriceTicket(total)}</span>
+      <div className="border-t border-black border-dashed pt-2 mb-4">
+        <div className="flex justify-between items-center text-sm font-black">
+          <span>TOTAL</span>
+          <span>{formatPriceTicket(total)}</span>
+        </div>
       </div>
+      <br />
 
-      {/* PIE DEL TICKET */}
-      <div className="ticket-footer">
+      <div className="text-center text-[10px] mt-4 mb-2">
         <p>¡Gracias por su compra!</p>
-        <p>@el_quincho.cocina</p>
-
-        <img
-          src="public/logo5to.png"
-          alt="Logo El Quincho Cocina"
-          className="ticket-logo"
-        />
+        <p className="mt-1">@el_quincho.cocina</p>
       </div>
-
     </div>
   );
 };
+
 
 
 // --- APLICACIÓN PRINCIPAL ---
@@ -1210,17 +1222,15 @@ export default function App() {
 }
 
 @page {
-  size: auto;
+  size: 58mm auto;
   margin: 0;
 }
 
 @media print {
-
-  html, body, #root {
-    width: auto !important;
+  html,
+  body {
+    width: 58mm !important;
     min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
@@ -1240,138 +1250,27 @@ export default function App() {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-
-    width: 100% !important;
-    max-width: none !important;
-
+    width: 58mm !important;
+    max-width: 58mm !important;
     margin: 0 !important;
-    padding: 2mm 3mm !important;
-
+    padding: 3mm !important;
     box-sizing: border-box !important;
     background: white !important;
     color: black !important;
-
-    font-family: "Courier New", monospace !important;
-    font-size: 9pt !important;
-    line-height: 1.25 !important;
-
+    font-family: monospace !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  #printable-area * {
-    box-sizing: border-box !important;
-  }
-
-  .ticket-header {
-    text-align: center;
-    padding-bottom: 7px;
-    margin-bottom: 8px;
-    border-bottom: 1px dashed black;
-  }
-
-  .ticket-header h1 {
-    margin: auto;
-    font-size: 16pt;
-    line-height: 1.1;
-    font-weight: 900;
-  }
-
-  .ticket-header p {
-  margin : auto ;
-    
-    font-size: 9pt;
-  }
-
-  .ticket-customer {
-    margin-bottom: 8px;
-    font-size: 9pt;
-    overflow-wrap: anywhere;
-  }
-
-  .ticket-customer p {
-    margin: 3px 0;
-  }
-
-  .ticket-separator {
-    border-top: 1px dashed black;
-    margin: 7px 0;
-  }
-
-  .ticket-items {
-    display: block;
-    width: 100%;
-  }
-
-  .ticket-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 4px;
-    width: 100%;
-    margin-bottom: 7px;
-    break-inside: avoid;
-  }
-
-  .ticket-item-description {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    min-width: 0;
-    flex: 1;
-    overflow-wrap: anywhere;
-  }
-
-  .ticket-item-description strong {
-    white-space: nowrap;
-  }
-
-  .ticket-item-price {
-    white-space: nowrap;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .ticket-item small {
-    display: block;
-    margin-top: 3px;
-    font-size: 8pt;
-    overflow-wrap: anywhere;
-  }
-
-  .ticket-total {
-      align: center;
-    display: flex;
-    justify-content: space-between;
-    gap: 5px;
-    padding-top: 8px;
-    margin: auto;
-    margin-top: 8px;
-    border-top: 1px dashed black;
-    font-size: 12pt;
-    font-weight: 900;
-  }
-
-  .ticket-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-align: center;
-    padding-top: 9px;
-    margin-top: 10px;
-    border-top: 1px dashed black;
-    font-size: 9pt;
-  }
-
-  .ticket-logo {
+  #printable-area img {
     display: block !important;
-    width: 28mm !important;
-    max-width: 100% !important;
-    height: auto !important;
-    margin: 5px auto 0 !important;
+    width: 16mm !important;
+    height: 16mm !important;
+    object-fit: contain !important;
+    margin: 0 auto 2mm !important;
   }
 }
+
 
       `}</style>
 
