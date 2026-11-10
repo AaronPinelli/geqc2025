@@ -335,22 +335,19 @@ const PrintableTicket = ({ cart = [], total = 0, customerName, customerAddress, 
       {/* Logo optimizado para que no se empaste en negro */}
       <div style={{ textAlign: 'center', width: '100%', marginTop: '8px' }}>
         <img
-          src="/logo5to.png"
+          src="./logo5to.png"
           alt="Logo"
           style={{
             display: 'inline-block',
             margin: '0 auto',
             width: '32mm',
             height: 'auto',
-            maxHeight: '22mm',
-            objectFit: 'contain',
-            imageRendering: 'pixelated',
-            filter: 'grayscale(100%) contrast(200%) brightness(110%)'
+           
           }}
           onError={(e) => {
             if (!e.currentTarget.dataset.retried) {
               e.currentTarget.dataset.retried = 'true';
-              e.currentTarget.src = '/logo.jpg';
+              e.currentTarget.src = './logo.jpg';
             } else {
               e.currentTarget.style.display = 'none';
             }
